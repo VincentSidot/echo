@@ -1,5 +1,6 @@
 # Compiler
-C_OPTS = -Wall -pedantic -std=c99 -D _DEFAULT_SOURCE -D _DEBUG -g
+# C_OPTS = -Wall -pedantic -std=c99 -D _DEFAULT_SOURCE -D _DEBUG -g
+C_OPTS = -Wall -pedantic -std=c99 -D _DEFAULT_SOURCE -O3
 CC = gcc ${C_OPTS}
 
 # Directories
