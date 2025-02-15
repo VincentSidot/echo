@@ -21,11 +21,6 @@
 #define _DA_MEMCPY memcpy
 #endif
 
-#ifndef _DA_MEMMOVE
-#include <string.h>
-#define _DA_MEMMOVE memmove
-#endif
-
 // Initial capacity of the dynamic array
 #ifndef _DA_INIT_CAPACITY
 #define _DA_INIT_CAPACITY 1
@@ -111,8 +106,8 @@
 // Remove an item from the dynamic array
 #define da_remove(da, index)                                                   \
   do {                                                                         \
-    _DA_MEMMOVE((da)->items + index, (da)->items + index + 1,                  \
-                (--(da)->count) - index);                                      \
+    _DA_MEMCPY((da)->items + index, (da)->items + index + 1,                   \
+               (--(da)->count) - index);                                       \
   } while (0)
 
 // Shrink the dynamic array to the count item
