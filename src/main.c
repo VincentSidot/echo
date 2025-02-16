@@ -11,6 +11,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#define _DA_INIT_CAPACITY 16
 #include "../includes/array.h"
 
 #define BUFF_SIZE 1024
