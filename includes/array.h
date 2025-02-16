@@ -198,12 +198,51 @@
     _da_unlock(da);                                                            \
   } while (0)
 
+// Initialize the dynamic array
 #define da_init(da)                                                            \
   do {                                                                         \
     (da)->count = 0;                                                           \
     (da)->capacity = 0;                                                        \
     (da)->items = NULL;                                                        \
     _da_init(da);                                                              \
+  } while (0)
+
+// Iterate over the dynamic array values with index and value without locking
+#define da_enum_unsafe(da, index, item)                                        \
+  __typeof__((da)->items)(item) = (da)->items + 0;                             \
+  for (size_t(index) = 0; (index) < (da)->count;                               \
+       (item) = (da)->items + ++(index))
+
+// Iterate over the dynamic array values without locking (neasted loop are not
+// supported)
+#define da_foreach_unsafe(da, item) da_enum_unsafe(da, _da_index, item)
+
+// Iterate over the dynamic array values with index and value without locking
+#define da_for_unsafe(da, index)                                               \
+  for (size_t(index) = 0; (index) < (da)->count; (index)++)
+
+// Iterate over the dynamic array values
+#define da_for(da, index, body)                                                \
+  do {                                                                         \
+    _da_lock(da);                                                              \
+    da_for_unsafe(da, index) { body; }                                         \
+    _da_unlock(da);                                                            \
+  } while (0)
+
+// Iterate over the dynamic array values
+#define da_foreach(da, item, body)                                             \
+  do {                                                                         \
+    _da_lock(da);                                                              \
+    da_foreach_unsafe(da, item) { body; }                                      \
+    _da_unlock(da);                                                            \
+  } while (0)
+
+// Iterate over the dynamic array values
+#define da_enum(da, index, item, body)                                         \
+  do {                                                                         \
+    _da_lock(da);                                                              \
+    da_enum_unsafe(da, index, item) { body; }                                  \
+    _da_unlock(da);                                                            \
   } while (0)
 
 // Define the dynamic array structure elements for a given type
