@@ -15,14 +15,22 @@ ${BIN_NAME}: ${BUILD_DIR}/main.o
 ${BUILD_DIR}/main.o: .build
 	${CC} -o ${BUILD_DIR}/main.o -c ${SRC_DIR}/main.c
 
-test: ${BUILD_DIR}/array_test
-	@${BUILD_DIR}/array_test
+test: ${BUILD_DIR}/array_test ${BUILD_DIR}/array_thread_test
+	${BUILD_DIR}/array_test
+	${BUILD_DIR}/array_thread_test
 
 ${BUILD_DIR}/array_test: ${BUILD_DIR}/array_test.o
 	@${CC} -o ${BUILD_DIR}/array_test ${BUILD_DIR}/array_test.o
 
 ${BUILD_DIR}/array_test.o: .build
 	@${CC} -o ${BUILD_DIR}/array_test.o -c ${SRC_DIR}/array_test.c
+
+${BUILD_DIR}/array_thread_test: ${BUILD_DIR}/array_thread_test.o
+	@${CC} -o ${BUILD_DIR}/array_thread_test ${BUILD_DIR}/array_thread_test.o
+
+${BUILD_DIR}/array_thread_test.o: .build
+	@${CC} -o ${BUILD_DIR}/array_thread_test.o -c ${SRC_DIR}/array_thread_test.c
+
 
 clean:
 	@rm -rf ${BUILD_DIR}
