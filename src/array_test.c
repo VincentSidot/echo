@@ -92,6 +92,28 @@ int test_remove() {
   return 0;
 }
 
+int test_foreach() {
+  s_da_int da = {0};
+
+  int items[] = {0, -1, -2, -3, -4, -5, -6, -7, -8, -9, -10};
+
+  da_append_many(&da, items, 11);
+
+  test_assert(da.count == 11, "Count should be 11");
+  test_assert(da.capacity == 16, "Capacity should be 16");
+
+  da_for(&da, index, {
+    int value = da.items[index];
+    test_assert(value == -index, "Item should be equal to index #1");
+  });
+
+  da_enum(&da, i, value,
+          { test_assert(*value == -i, "Item should be equal to index #2"); });
+
+  da_free(&da);
+  return 0;
+}
+
 int main() {
 
   int failed = 0;
@@ -99,6 +121,7 @@ int main() {
   failed += test_append();
   failed += test_fast_remove();
   failed += test_remove();
+  failed += test_foreach();
 
   if (failed) {
     eprintf(COLOR_RED "Failed %d tests" COLOR_RESET "\n", failed);
