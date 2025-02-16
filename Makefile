@@ -5,31 +5,42 @@ CC = gcc ${C_OPTS}
 
 # Directories
 BUILD_DIR = build
+TEST_DIR = tests
 SRC_DIR = src
-BIN_NAME = echo
+
+.PHONY: clean .build test echo client
 
 # Targets
-${BIN_NAME}: ${BUILD_DIR}/main.o
-	${CC} -o ${BUILD_DIR}/${BIN_NAME} ${BUILD_DIR}/main.o
+client: ${BUILD_DIR}/client
+echo: ${BUILD_DIR}/echo
 
-${BUILD_DIR}/main.o: .build
-	${CC} -o ${BUILD_DIR}/main.o -c ${SRC_DIR}/main.c
+${BUILD_DIR}/client: ${BUILD_DIR}/client.o
+	${CC} -o ${BUILD_DIR}/client ${BUILD_DIR}/client.o
 
-test: ${BUILD_DIR}/array_test ${BUILD_DIR}/array_thread_test
-	${BUILD_DIR}/array_test
-	${BUILD_DIR}/array_thread_test
+${BUILD_DIR}/client.o: .build
+	${CC} -o ${BUILD_DIR}/client.o -c ${SRC_DIR}/client.c
 
-${BUILD_DIR}/array_test: ${BUILD_DIR}/array_test.o
-	@${CC} -o ${BUILD_DIR}/array_test ${BUILD_DIR}/array_test.o
+${BUILD_DIR}/echo: ${BUILD_DIR}/echo.o
+	${CC} -o ${BUILD_DIR}/echo ${BUILD_DIR}/echo.o
 
-${BUILD_DIR}/array_test.o: .build
-	@${CC} -o ${BUILD_DIR}/array_test.o -c ${SRC_DIR}/array_test.c
+${BUILD_DIR}/echo.o: .build
+	${CC} -o ${BUILD_DIR}/echo.o -c ${SRC_DIR}/echo.c
 
-${BUILD_DIR}/array_thread_test: ${BUILD_DIR}/array_thread_test.o
-	@${CC} -o ${BUILD_DIR}/array_thread_test ${BUILD_DIR}/array_thread_test.o
+test: ${BUILD_DIR}/test_array ${BUILD_DIR}/test_array_thread
+	${BUILD_DIR}/test_array
+	${BUILD_DIR}/test_array_thread
 
-${BUILD_DIR}/array_thread_test.o: .build
-	@${CC} -o ${BUILD_DIR}/array_thread_test.o -c ${SRC_DIR}/array_thread_test.c
+${BUILD_DIR}/test_array: ${BUILD_DIR}/test_array.o
+	@${CC} -o ${BUILD_DIR}/test_array ${BUILD_DIR}/test_array.o
+
+${BUILD_DIR}/test_array.o: .build
+	@${CC} -o ${BUILD_DIR}/test_array.o -c ${TEST_DIR}/array.c
+
+${BUILD_DIR}/test_array_thread: ${BUILD_DIR}/test_array_thread.o
+	@${CC} -o ${BUILD_DIR}/test_array_thread ${BUILD_DIR}/test_array_thread.o
+
+${BUILD_DIR}/test_array_thread.o: .build
+	@${CC} -o ${BUILD_DIR}/test_array_thread.o -c ${TEST_DIR}/array_thread.c
 
 
 clean:
@@ -37,5 +48,3 @@ clean:
 
 .build:
 	@mkdir -p ${BUILD_DIR}
-
-.PHONY: clean .build
