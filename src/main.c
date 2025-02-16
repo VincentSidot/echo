@@ -44,9 +44,7 @@ void cleanup(s_context *ctx) {
     return;
   }
   // Cleanup
-  for (size_t i = 0; i < ctx->fds->count; i++) {
-    close(ctx->fds->items[i].fd);
-  }
+  da_foreach_unsafe(ctx->fds, item) { close(item->fd); }
   da_free(ctx->fds);
   da_free(ctx->addrs);
   free(ctx);
@@ -153,40 +151,39 @@ int echo_server(int fd) {
  * @return int file descriptor of the server
  */
 int init_server(s_context *ctx) {
-  struct sockaddr_in serv_addr;
+  struct sockaddr_in addr;
   int sockopt = 1;
-  int serverfd = 0;
+  int fd = 0;
 
   // Create socket
-  serverfd = socket(AF_INET, SOCK_STREAM, 0);
-  if (serverfd == -1) {
+  fd = socket(AF_INET, SOCK_STREAM, 0);
+  if (fd == -1) {
     eprintf("Error socket failed: %s\n", strerror(errno));
     return -1;
   }
 
-  if (setsockopt(serverfd, SOL_SOCKET, SO_REUSEADDR, &sockopt,
-                 sizeof(sockopt))) {
+  if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &sockopt, sizeof(sockopt))) {
     eprintf("Error setsockopt failed: %s\n", strerror(errno));
     cleanup(ctx);
     return -1;
   }
 
   // Setup the server
-  memset(&serv_addr, '0', sizeof(serv_addr));
-  serv_addr.sin_family = AF_INET;
-  serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-  serv_addr.sin_port = htons(SERVER_PORT);
+  memset(&addr, '0', sizeof(addr));
+  addr.sin_family = AF_INET;
+  addr.sin_addr.s_addr = htonl(INADDR_ANY);
+  addr.sin_port = htons(SERVER_PORT);
 
-  if (bind(serverfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) != 0) {
+  if (bind(fd, (struct sockaddr *)&addr, sizeof(addr)) != 0) {
     eprintf("Error bind failed: %s\n", strerror(errno));
     cleanup(ctx);
     return -1;
   };
 
-  listen(serverfd, 10);
+  listen(fd, 10);
   printf("Server started on port %d\n", (int)SERVER_PORT);
 
-  return serverfd;
+  return fd;
 }
 
 /**
