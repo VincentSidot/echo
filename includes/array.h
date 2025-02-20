@@ -36,6 +36,13 @@
 #define _DA_MEMCPY memcpy
 #endif
 
+// Move memory from one location to another (must have the same signature as
+// memmove)
+#ifndef _DA_MEMMOVE
+#include <string.h>
+#define _DA_MEMMOVE memmove
+#endif
+
 // Initial capacity of the dynamic array
 #ifndef _DA_INIT_CAPACITY
 #define _DA_INIT_CAPACITY 1
@@ -44,12 +51,8 @@
 // Resize the dynamic array to the new capacity
 #define _da_realloc(da)                                                        \
   do {                                                                         \
-    if ((da)->items == NULL) {                                                 \
-      (da)->items = _DA_MALLOC((da)->capacity * sizeof(*(da)->items));         \
-    } else {                                                                   \
-      (da)->items =                                                            \
-          _DA_REALLOC((da)->items, (da)->capacity * sizeof(*(da)->items));     \
-    }                                                                          \
+    (da)->items =                                                              \
+        _DA_REALLOC((da)->items, (da)->capacity * sizeof(*(da)->items));       \
     assert(((da)->items != NULL) && "Maybe you should buy more RAM");          \
   } while (0)
 
@@ -171,8 +174,8 @@
 // Remove an item from the dynamic array without locking
 #define da_remove_unsafe(da, index)                                            \
   do {                                                                         \
-    _DA_MEMCPY((da)->items + index, (da)->items + index + 1,                   \
-               (--(da)->count) - index);                                       \
+    _DA_MEMMOVE((da)->items + index, (da)->items + index + 1,                  \
+                ((--(da)->count) - index) * sizeof(*(da)->items));             \
   } while (0)
 
 // Remove an item from the dynamic array
@@ -205,6 +208,60 @@
     (da)->capacity = 0;                                                        \
     (da)->items = NULL;                                                        \
     _da_init(da);                                                              \
+  } while (0)
+
+// Initialize the dynamic array with a given capacity
+#define da_init_with_capacity(da, _capacity)                                   \
+  do {                                                                         \
+    (da)->count = 0;                                                           \
+    (da)->capacity = (_capacity);                                              \
+    (da)->items = NULL;                                                        \
+    _da_init(da);                                                              \
+    _da_realloc(da);                                                           \
+  } while (0)
+
+// Insert an item at a given index without locking
+#define da_insert_unsafe(da, index, item)                                      \
+  do {                                                                         \
+    if ((da)->count >= (da)->capacity) {                                       \
+      _da_increase(da);                                                        \
+      _da_realloc(da);                                                         \
+    }                                                                          \
+    _DA_MEMMOVE((da)->items + (index) + 1, (da)->items + (index),              \
+                (((da)->count++) - (index)) * sizeof(*(da)->items));           \
+    (da)->items[(index)] = (item);                                             \
+  } while (0)
+
+// Insert an item at a given index
+#define da_insert(da, index, item)                                             \
+  do {                                                                         \
+    _da_lock(da);                                                              \
+    da_insert_unsafe(da, index, item);                                         \
+    _da_unlock(da);                                                            \
+  } while (0)
+
+// Insert many items at a given index without locking
+#define da_insert_many_unsafe(da, index, _items, _count)                       \
+  do {                                                                         \
+    if ((da)->count + (_count) > (da)->capacity) {                             \
+      while ((da)->count + (_count) > (da)->capacity) {                        \
+        _da_increase(da);                                                      \
+      }                                                                        \
+      _da_realloc(da);                                                         \
+    }                                                                          \
+    _DA_MEMMOVE((da)->items + (index) + (_count), (da)->items + (index),       \
+                (((da)->count) - (index)) * sizeof(*(da)->items));             \
+    _DA_MEMMOVE((da)->items + (index), (_items),                               \
+                (_count) * sizeof(*(da)->items));                              \
+    (da)->count += (_count);                                                   \
+  } while (0)
+
+// Insert many items at a given index
+#define da_insert_many(da, index, _items, _count)                              \
+  do {                                                                         \
+    _da_lock(da);                                                              \
+    da_insert_many_unsafe(da, index, _items, _count);                          \
+    _da_unlock(da);                                                            \
   } while (0)
 
 // Iterate over the dynamic array values with index and value without locking

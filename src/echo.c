@@ -220,8 +220,8 @@ int run_server(s_context *ctx) {
 
           // Remove doesn't preserve order but we remove at same
           // time so it should be fine.
-          da_fast_remove(fds, i);
-          da_fast_remove(addrs, i - 1);
+          da_fast_remove(fds, i--);
+          da_fast_remove(addrs, i);
         }
       }
     }

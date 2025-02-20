@@ -70,6 +70,7 @@ int test_remove() {
   s_da_int da = {0};
 
   int items[] = {1, 2, 3, 4, 5};
+  size_t offset = 0;
 
   da_append_many(&da, items, 5);
 
@@ -88,9 +89,11 @@ int test_remove() {
 
   for (size_t i = 0; i < da.count; i++) {
     if (i == 2) {
+      offset++;
       continue;
     }
-    test_assert(da.items[i] == i + 1, "Item should be equal to index + 1");
+    test_assert(da.items[i - offset] == i + 1,
+                "Item should be equal to index + 1");
   }
 
   da_free(&da);

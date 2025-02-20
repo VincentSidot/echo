@@ -1,6 +1,6 @@
 # Compiler
-# C_OPTS = -Wall -pedantic -std=c99 -D _DEFAULT_SOURCE -D _DEBUG -g
-C_OPTS = -Wall -pedantic -std=c99 -D _DEFAULT_SOURCE -O3
+# C_OPTS = -Wall -pedantic -std=c11 -D _DEFAULT_SOURCE -D _DEBUG -g
+C_OPTS = -Wall -pedantic -std=c11 -D _DEFAULT_SOURCE -O3
 CC = gcc ${C_OPTS}
 
 # Directories
@@ -14,16 +14,16 @@ SRC_DIR = src
 client: ${BUILD_DIR}/client
 echo: ${BUILD_DIR}/echo
 
-${BUILD_DIR}/client: ${BUILD_DIR}/client.o
+${BUILD_DIR}/client: ${SRC_DIR}/client.c
 	${CC} -o ${BUILD_DIR}/client ${BUILD_DIR}/client.o
 
-${BUILD_DIR}/client.o: .build
+${SRC_DIR}/client.c: .build
 	${CC} -o ${BUILD_DIR}/client.o -c ${SRC_DIR}/client.c
 
-${BUILD_DIR}/echo: ${BUILD_DIR}/echo.o
+${BUILD_DIR}/echo: ${SRC_DIR}/echo.c
 	${CC} -o ${BUILD_DIR}/echo ${BUILD_DIR}/echo.o
 
-${BUILD_DIR}/echo.o: .build
+${SRC_DIR}/echo.c: .build
 	${CC} -o ${BUILD_DIR}/echo.o -c ${SRC_DIR}/echo.c
 
 test: ${BUILD_DIR}/test_array ${BUILD_DIR}/test_array_thread
